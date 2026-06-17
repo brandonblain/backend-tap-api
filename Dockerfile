@@ -1,15 +1,19 @@
 FROM php:8.3-apache
 
-# Instalar extensiones del sistema y PHP necesarias para Laravel
+# Instalar extensiones del sistema, herramientas y librerías para MongoDB
 RUN apt-get update && apt-get install -y \
     libpng-dev \
     libonig-dev \
     libxml2-dev \
+    libssl-dev \
     zip \
     unzip \
     git \
     curl \
     && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
+
+# Instalar y habilitar la extensión de MongoDB para PHP
+RUN pecl install mongodb && docker-php-ext-enable mongodb
 
 # Habilitar el módulo de reescritura de Apache para Laravel (mod_rewrite)
 RUN a2enmod rewrite
