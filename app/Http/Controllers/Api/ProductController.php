@@ -13,8 +13,8 @@ class ProductController extends Controller
     // Mostrar listado completo de productos NoSQL
     public function index(): JsonResponse
     {
-        $products = Product::all();
-        return response()->json(ProductResource::collection($products));
+        $products = Product::orderBy('created_at', 'desc')->get();
+        return response()->json(ProductResource::collection($products)->resolve(), 200);
     }
 
     // Alta de producto con código autogenerado
@@ -28,7 +28,7 @@ class ProductController extends Controller
     public function show(string $id): JsonResponse
     {
         $product = Product::findOrFail($id);
-        return response()->json(new ProductResource($product));
+        return response()->json(new ProductResource($product), 200);
     }
 
     // Edición de producto
@@ -36,7 +36,7 @@ class ProductController extends Controller
     {
         $product = Product::findOrFail($id);
         $product->update($request->validated());
-        return response()->json(new ProductResource($product));
+        return response()->json(new ProductResource($product), 200);
     }
 
     // Eliminación de producto
