@@ -76,7 +76,7 @@ class AuthController extends Controller
         }
 
         //Valida que el usuario realmente existe en la base de datos
-        $user = User::where('email', $request->email)->first();
+        $user = User::where('user', $request->email)->first();
 
         if (!$user) {
             return response()->json([
@@ -93,7 +93,7 @@ class AuthController extends Controller
             $user->save();
 
             //Enviar las credenciales nuevas al correo registrado del usuario
-            Mail::to($user->email)->send(new RecoverPasswordMail($temporaryPassword, $user->name));
+            Mail::to($user->user)->send(new RecoverPasswordMail($temporaryPassword, $user->name));
 
             return response()->json([
                 'message' => 'Credenciales actualizadas. Se ha enviado la nueva contraseña a tu correo.'
