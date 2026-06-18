@@ -15,40 +15,53 @@ class AuthController extends Controller
      * Maneja el inicio de sesión de los usuarios (Login).
      */
     public function login(Request $request): JsonResponse
-    {
-        //Validamos los datos del usuario
-        $credentials = $request->validate([
-            'user' => 'required|email',
-            'password' => 'required|string',
-        ]);
+{
+    //Validamos los datos del usuario
+    $credentials = $request->validate([
+        'user' => 'required|email',
+        'password' => 'required|string',
+    ]);
 
-        //Busca al usuario en Atlas
-        $user = User::where('user', $credentials['user'])->first();
+    //Busca al usuario en Atlas
+    $user = User::where('user', $credentials['user'])->first();
 
-        //Valida que el usuario exista y la contraseña coincida (Seguridad)
-        if (!$user || !Hash::check($credentials['password'], $user->password)) {
-            return response()->json([
-                'message' => 'Las credenciales proporcionadas son incorrectas.'
-            ], 401);
-        }
-
-        //Genera un Token de acceso seguro para Angular
-        $token = $user->createToken('auth_token')->plainTextToken;
-
-        //Retornamos el response con sus datos de perfil y secciones autorizadas
+    //Valida que el usuario exista y la contraseña coincida (Seguridad)
+    if (!$user || !Hash::check($credentials['password'], $user->password)) {
         return response()->json([
-            'message' => '¡Inicio de sesión exitoso!',
-            'access_token' => $token,
-            'token_type' => 'Bearer',
-            'user' => [
-                'code' => $user->code,
-                'name' => $user->name,
-                'user' => $user->user,
-                'profile_pic' => $user->profile_pic,
-                'profiles' => $user->profile_codes 
-            ]
-        ], 200);
+            'message' => 'Las credenciales proporcionadas son incorrectas.'
+        ], 401);
     }
+
+    //Genera un Token de acceso seguro para Angular
+    $token = $user->createToken('auth_token')->plainTextToken;
+
+    
+    $roles = $user->profile_codes;
+    $sections = [];
+
+    if (str_contains($roles, 'SUPER_ADMIN')) {
+        $sections = ['DASHBOARD', 'PRODUCTOS', 'USUARIOS'];
+    } else if (str_contains($roles, 'AUXILIAR_ALMACEN')) {
+        $sections = ['PRODUCTOS'];
+    } else if (str_contains($roles, 'RECURSOS_HUMANOS')) {
+        $sections = ['USUARIOS'];
+    }
+
+    //Retornamos el response con sus datos de perfil y secciones autorizadas
+    return response()->json([
+        'message' => '¡Inicio de sesión exitoso!',
+        'access_token' => $token,
+        'token_type' => 'Bearer',
+        'user' => [
+            'code' => $user->code,
+            'name' => $user->name,
+            'user' => $user->user,
+            'profile_pic' => $user->profile_pic,
+            'profiles' => $user->profile_codes,
+            'sections' => $sections // <--- Inyectamos el array limpio para que el Route Guard lo procese
+        ]
+    ], 200);
+}
 
     /**
      * Maneja el cierre de sesión (Logout).
