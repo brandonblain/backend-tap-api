@@ -41,7 +41,7 @@ class AuthController extends Controller
     $sections = [];
 
     if (in_array('SUPER_ADMIN', $rolesArray)) {
-        $sections = ['DASHBOARD', 'PRODUCTOS', 'USUARIOS'];
+    $sections = ['DASHBOARD', 'PRODUCTOS', 'USUARIOS', 'PERFILES']; 
     } else if (in_array('AUXILIAR_ALMACEN', $rolesArray)) {
         $sections = ['PRODUCTOS'];
     } else if (in_array('RECURSOS_HUMANOS', $rolesArray)) {
