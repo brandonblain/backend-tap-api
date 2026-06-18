@@ -19,5 +19,5 @@ Route::middleware('auth:sanctum')->group(function () {
     
     Route::apiResource('products', ProductController::class);
     Route::apiResource('users', UserController::class);
-    Route::get('profiles', [ProfileController::class, 'index']);
+    Route::apiResource('profiles', ProfileController::class);
 });

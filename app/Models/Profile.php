@@ -9,20 +9,28 @@ class Profile extends Model
     protected $connection = 'mongodb';
     protected $collection = 'profiles';
 
+    // Habilitamos los timestamps para garantizar que exista la "Fecha de creación"
+    public $timestamps = true; 
+
+    // Campos autorizados por la rúbrica para asignación masiva
     protected $fillable = [
-        'code',
-        'name',
-        'sections' // Arreglo de secciones permitidas, ej: ["products", "users"]
+        'code',     // 1. Código de perfil (Auto-generado en el booted)
+        'name',     // 2. Nombre del perfil
+        'sections'  // d. Lista de secciones relacionadas al perfil (Permisos)
     ];
 
+    // Requisito d: Forzamos a MongoDB a tratar las secciones como un arreglo nativo
     protected $casts = [
-        'sections' => 'array' // Mapeo automático NoSQL para arreglos de strings
+        'sections' => 'array' 
     ];
 
+    /**
+     * Automatización del Código de Perfil
+     */
     protected static function booted(): void
     {
         static::creating(function (Profile $profile) {
-            // Genera de forma automática el consecutivo PROF-0001
+            // Requisito 1: Genera el consecutivo estricto PROF-XXXX basado en tu conteo
             $count = static::count();
             $profile->code = 'PROF-' . str_pad($count + 1, 4, '0', STR_PAD_LEFT);
         });

@@ -89,8 +89,6 @@ class UserController extends Controller
         ], 200);
     }
 
-
-
     // Eliminar un usuario
     public function destroy(string $id): JsonResponse
     {
