@@ -15,26 +15,26 @@ class AuthController extends Controller
      */
     public function login(Request $request): JsonResponse
     {
-        // 1. Validamos los datos requeridos
+        //Validamos los datos del usuario
         $credentials = $request->validate([
             'user' => 'required|email',
             'password' => 'required|string',
         ]);
 
-        // 2. Buscamos al usuario en MongoDB Atlas
+        //Busca al usuario en Atlas
         $user = User::where('user', $credentials['user'])->first();
 
-        // 3. Validamos que el usuario exista y la contraseña coincida (Seguridad)
+        //Valida que el usuario exista y la contraseña coincida (Seguridad)
         if (!$user || !Hash::check($credentials['password'], $user->password)) {
             return response()->json([
                 'message' => 'Las credenciales proporcionadas son incorrectas.'
             ], 401);
         }
 
-        // 4. Generamos un Token de acceso seguro para Angular
+        //Genera un Token de acceso seguro para Angular
         $token = $user->createToken('auth_token')->plainTextToken;
 
-        // 5. Retornamos la respuesta con sus datos de perfil y secciones autorizadas
+        //Retornamos el response con sus datos de perfil y secciones autorizadas
         return response()->json([
             'message' => '¡Inicio de sesión exitoso!',
             'access_token' => $token,
@@ -44,7 +44,7 @@ class AuthController extends Controller
                 'name' => $user->name,
                 'user' => $user->user,
                 'profile_pic' => $user->profile_pic,
-                'profiles' => $user->profile_codes // Angular usará esto para bloquear/desbloquear pantallas
+                'profiles' => $user->profile_codes 
             ]
         ], 200);
     }
@@ -61,4 +61,50 @@ class AuthController extends Controller
             'message' => 'Sesión cerrada correctamente.'
         ], 200);
     }
+
+    /**
+     *Recuperación de CONTRASEÑA
+     */
+    public function recoverPassword(Request $request): JsonResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        //Valida que el usuario realmente existe en la base de datos
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user) {
+            return response()->json([
+                'message' => 'El correo electrónico no se encuentra registrado en el sistema.'
+            ], 444);
+        }
+
+        try {
+            //Genera credencial temporal de 8 caracteres aleatorios
+            $temporaryPassword = Str::random(8);
+
+            //Actualizar la contraseña encriptada en el modelo del usuario
+            $user->password = Hash::make($temporaryPassword);
+            $user->save();
+
+            //Enviar las credenciales nuevas al correo registrado del usuario
+            Mail::to($user->email)->send(new RecoverPasswordMail($temporaryPassword, $user->name));
+
+            return response()->json([
+                'message' => 'Credenciales actualizadas. Se ha enviado la nueva contraseña a tu correo.'
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error al procesar el envío del correo.',
+                'error'   => $e->getMessage()
+            ], 500);
+        }
+    }
+
 }

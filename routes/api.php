@@ -10,13 +10,13 @@ use App\Models\Profile;
 use App\Models\Products;
 use App\Models\User;
 
-// Ruta pública para iniciar sesión
+//Inicio de sesión
 Route::post('/login', [AuthController::class, 'login']);
+Route::post('/recover-password', [AuthController::class, 'recoverPassword']);
 
 // Rutas protegidas (Solo pueden usarse si el usuario ya inició sesión)
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
-    
     Route::apiResource('products', ProductController::class);
     Route::apiResource('users', UserController::class);
     Route::apiResource('profiles', ProfileController::class);
