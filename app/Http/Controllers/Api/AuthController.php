@@ -94,7 +94,7 @@ class AuthController extends Controller
             $user->save();
 
             //Enviar las credenciales nuevas al correo registrado del usuario
-            \Mail::to($user->user)->send(new RecoverPasswordMail($temporaryPassword, $user->name));
+            \Mail::to($user->user)->send(new \App\Mail\RecoverPasswordMail($temporaryPassword, $user->name));
 
             return response()->json([
                 'message' => 'Credenciales actualizadas. Se ha enviado la nueva contraseña a tu correo.'
