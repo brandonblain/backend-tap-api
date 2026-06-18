@@ -37,13 +37,14 @@ class AuthController extends Controller
 
     
     $roles = $user->profile_codes;
+    $rolesArray = is_array($roles) ? $roles : (json_decode($roles, true) ?? []);
     $sections = [];
 
-    if (str_contains($roles, 'SUPER_ADMIN')) {
+    if (in_array('SUPER_ADMIN', $rolesArray)) {
         $sections = ['DASHBOARD', 'PRODUCTOS', 'USUARIOS'];
-    } else if (str_contains($roles, 'AUXILIAR_ALMACEN')) {
+    } else if (in_array('AUXILIAR_ALMACEN', $rolesArray)) {
         $sections = ['PRODUCTOS'];
-    } else if (str_contains($roles, 'RECURSOS_HUMANOS')) {
+    } else if (in_array('RECURSOS_HUMANOS', $rolesArray)) {
         $sections = ['USUARIOS'];
     }
 
@@ -57,8 +58,8 @@ class AuthController extends Controller
             'name' => $user->name,
             'user' => $user->user,
             'profile_pic' => $user->profile_pic,
-            'profiles' => $user->profile_codes,
-            'sections' => $sections // <--- Inyectamos el array limpio para que el Route Guard lo procese
+            'profiles' => $rolesArray,
+            'sections' => $sections // Inyectamos el array limpio para Angular
         ]
     ], 200);
 }
