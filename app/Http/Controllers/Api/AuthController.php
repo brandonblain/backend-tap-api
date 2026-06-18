@@ -67,7 +67,7 @@ class AuthController extends Controller
      */
     public function recoverPassword(Request $request): JsonResponse
     {
-        $validator = Validator::make($request->all(), [
+        $validator = \Validator::make($request->all(), [
             'email' => 'required|email'
         ]);
 
