@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
@@ -86,7 +87,7 @@ class AuthController extends Controller
 
         try {
             //Genera credencial temporal de 8 caracteres aleatorios
-            $temporaryPassword = Str::random(8);
+            $temporaryPassword = \Illuminate\Support\Str::random(8);
 
             //Actualizar la contraseña encriptada en el modelo del usuario
             $user->password = Hash::make($temporaryPassword);
